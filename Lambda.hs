@@ -3,11 +3,6 @@ module Lambda where
 import Data.List
 import Parser
 
--- Whereas this one is used for testing purposes where vars are strings, for the sake of simplicity.
---data Expr e = Var Char | Const Int | Lambda Char (Expr e) | App (Expr e) (Expr e) | Let (Expr e) (Expr e) (Expr e)
-
--- ASK: Is it okay if I overwrite the Show definitions with mine in the Parser module? A: Yup.
-
 -- Show behavior for Prim
 instance Show (Op) where
   show (Plus) = " + "
@@ -42,8 +37,6 @@ instance Eq (Expr e) where
   (Constr (x,y)) == (Constr (z,w)) = (x == z) && (y == w)
   (Prim (x) op1 (y)) == (Prim (z) op2 (k)) = (x == z) && (y == k) && (op1 == op2)
 
--- ASK: about freeVar and boundVar definitions for Let functions...
-
 boundVar :: Expr e -> [Char]
 boundVar (Var v) = []
 boundVar (Const c) = []
@@ -63,9 +56,6 @@ freeVar (App t1 t2)
   | otherwise = (freeVar t1) ++ (freeVar t2)
 
 -- Implementation for variable substituting
-
--- ASK: should variable capture be handled in sub function? A: YES
--- ASK: If a is a constant then [N/x] a is always = a, correct? A: YES
 
 sub :: Expr e -> Expr e -> Char -> Expr e
 sub (Const c) (_) _ = Const c
@@ -92,8 +82,6 @@ capture :: Expr e -> Expr e -> Bool
 capture m n = ((boundVar(m) `intersect` freeVar(n)) /= [])
 
 -- EvalV: function for evaluation of lambda terms using call-by-value
-
--- ASK: how can I understand Constapply, what is it for and how is it implemented? A: WTV
 
 evalV :: Expr e -> Expr e
 evalV (Const c) = Const c
@@ -125,7 +113,6 @@ evalN (App t1 t2)
           v' = (getVar t')
 
 -- Helper function to handle cases such as (App (Var 'x') (Lambda 'y' (Var 'y'))) which are not reducible through lambda calculus.
--- ASK: about correctness of function. A: correct.
 
 isReducible :: Expr e -> Bool
 isReducible (Var _) = False
@@ -160,10 +147,7 @@ getExpr :: Expr e -> Expr e
 getExpr (Lambda v e) = e
 getExpr _ = error "Var not in scope!"
 
--- Weak-reduction for call-by-need, evaluator function for axioms
-
 -- Check whether a term has a variable-bound context, useful in the pattern guards on the (V) axiom.
--- ASK: Do the definitions in fillContext suffice for the "handling" of context scenarios?
 
 hasContext :: Expr e -> Expr e -> Bool
 hasContext (Var x) (Const c) = False
@@ -182,9 +166,8 @@ fillContext (Var v) (App m n) (z)
   | (hasContext (Var v) (m)) = App (fillContext (Var v) (m) (z)) (n)
   | (hasContext (Var v) (n)) = App m (fillContext (Var v) (n) (z))
 
--- ASK: What should I do with non-terminating terms when implementing rule (G)? Merge it with (V) like I did?
--- ASK: What do I do for cases like "let x = (\\z.z) y in x"?
--- ASK: is the pattern (App (m) (n)) well matched?
+-- ASK: What should I do with non-terminating terms when implementing rule (G)? Merge it with (V) like I did? A: YES
+-- ASK: is the pattern (App (m) (n)) well matched? A: YES.
 
 evalNeed :: Expr e -> Expr e
 evalNeed (Const c) = Const c
@@ -233,13 +216,10 @@ s3 = 'k'
 s3' = 'x'
 
 -- This test, when applied to sub function leads to variable capture!
--- Should I define an auxiliary function to rename variables when needed or is that in the scope of the parsing process?
 
 s4 = Lambda 'y' (Var 'x')
 s5 = Var 'y'
 s6 = 'x'
-
--- TODO: lists (head & tail), if-then-else statements and Y combinator, let var = ... to App
 
 -- Implementation of ordered pairs and binary operations
 
@@ -253,8 +233,6 @@ false = Lambda 'x' (Lambda 'y' (Var 'y'))
 fst' = Lambda 'p' (App (Var 'p') (true))
 
 snd' = Lambda 'p' (App (Var 'p') (false))
-
--- Don't forget: Lambda associates to the left. When in doubt imagine parenthesis.
 
 pair = Lambda 'x' (Lambda 'y' (Lambda 'f' (App (App (Var 'f') (Var 'x')) (Var 'y'))))
 
