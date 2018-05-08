@@ -123,22 +123,4 @@ dropInt l = (dropWhile (isDigit) l)
 toData :: [Token] -> (Expr e)
 toData t = expr t
 
--- Test cases for lexer
-
-idnt = lexer "(\\x.x)"
-
-omm = lexer "(\\x.xx) (\\x.xx)"
-
-applvarlc = lexer "(\\z.z) x (\\y.yy) 124"
-
-xxapp = lexer "(\\x.xx) y"
-
-vapp = lexer "x (\\y.y)"
-
-vapp1 = lexer "x y"
-
-vapp2 = lexer "(x) (y)"
-
-vapp3 = lexer "xy"
-
 }

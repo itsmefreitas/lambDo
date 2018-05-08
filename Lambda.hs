@@ -2,6 +2,7 @@ module Lambda where
 
 import Data.List
 import Parser
+import BetaTests
 
 -- Show behavior for Prim
 instance Show (Op) where
@@ -196,52 +197,3 @@ evalMain t l
   | (t == "V") = evalV (ins)
   | (t == "L") = evalNeed (ins)
     where ins = toData (lexer l)
-
--- Lambda terms definitions for testing
-
-ident = Lambda 'x' (Var 'x')
-
-t1 = Lambda 'x' (Lambda 'k' (Var 't'))
-c1 = Lambda 'x' (Const 0)
-c2 = Const 1
-
-v1 = Var 'z'
-
-a1 = App (Lambda 'x' (Var 'x')) (Lambda 'z' (App (Lambda 'y' (Var 'y')) (Var 'x')))
-
-s1 = (Var 'x')
-s2 = Lambda 'z' (App (Var 'z') (Var 'y'))
-s3 = 'k'
-
-s3' = 'x'
-
--- This test, when applied to sub function leads to variable capture!
-
-s4 = Lambda 'y' (Var 'x')
-s5 = Var 'y'
-s6 = 'x'
-
--- Implementation of ordered pairs and binary operations
-
-pairTestFst = (App (fst') (App (App (pair) (Const 3)) (Const 5)))
-pairTestSnd = (App (snd') (App (App (pair) (Const 3)) (Const 5)))
-
-true = Lambda 'x' (Lambda 'y' (Var 'x'))
-
-false = Lambda 'x' (Lambda 'y' (Var 'y'))
-
-fst' = Lambda 'p' (App (Var 'p') (true))
-
-snd' = Lambda 'p' (App (Var 'p') (false))
-
-pair = Lambda 'x' (Lambda 'y' (Lambda 'f' (App (App (Var 'f') (Var 'x')) (Var 'y'))))
-
--- Tests for termination: evalV vs. evalN
-
-trmnt = (App (ycon) (omega))
-
-omega = (App (xxop) (xxop))
-
-xxop = Lambda 'x' (App (Var 'x') (Var 'x'))
-
-ycon = Lambda 'x' (Var 'y')
