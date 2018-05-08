@@ -3,6 +3,8 @@ module Launchbury where
 import Lambda
 import Parser
 import Data.List
+import Utils
+import BetaTests
 
 freshVar :: Expr e -> Char
 freshVar m = head ((['z','y'..'a'] ++ ['Z','Y'..'A']) \\ (freeVar(m) `union` boundVar(m)))
