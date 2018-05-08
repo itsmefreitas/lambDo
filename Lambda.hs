@@ -1,7 +1,5 @@
 module Lambda where
 
--- Testing VSCode GIT integration
-
 import Data.List
 import Parser
 
