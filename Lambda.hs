@@ -1,9 +1,10 @@
 module Lambda where
 
 import Data.List
+import Launchbury
+import Common
 import Parser
 import Utils
-import Common
 
 -- EvalV: function for evaluation of lambda terms using call-by-value
 
@@ -58,4 +59,6 @@ evalMain t l
   | (t == "N") = evalN (ins)
   | (t == "V") = evalV (ins)
   | (t == "L") = evalNeed (ins)
-    where ins = toData (lexer l)
+  | (t == "M") = snd (evalLaunch [] nins)
+    where ins = lexData l
+          nins = lexNorm l

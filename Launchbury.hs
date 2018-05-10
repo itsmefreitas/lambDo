@@ -1,6 +1,5 @@
 module Launchbury where
 
-import Parser
 import Data.List
 import Utils
 import Common

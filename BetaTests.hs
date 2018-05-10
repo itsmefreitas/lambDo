@@ -1,8 +1,8 @@
 module BetaTests where
 
+import Common
 import Launchbury
 import Lambda
-import Common
 import Parser
 
 -- Lambda terms definitions for testing

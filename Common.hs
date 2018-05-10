@@ -1,7 +1,10 @@
 module Common where
 
 import Data.List
-import Parser
+
+data Expr e = Var Char | Const Int | Lambda Char (Expr e) | App (Expr e) (Expr e) | Let (Expr e) (Expr e) (Expr e) | Constr ((Expr e),(Expr e)) | Prim (Expr e) Op (Expr e)
+
+data Op = Plus | Minus | Times | Div
 
 -- Helper function to get a fresh var (used in normalization).
 
@@ -38,17 +41,17 @@ sub (Var v) (l) s
     | (not (capture (Var v) (l))) =
     if (v == s) then l
     else (Var v)
-    | otherwise = (Var v)
+    | otherwise = error "Cannot perform substitution with variable capture!"
 sub (Lambda v e) (l) s
     | (not (capture (Lambda v e) (l))) =
     if (v == s) then (Lambda v e)
     else (Lambda v (sub e l s))
-    | otherwise = (Lambda v e)
+    | otherwise = error "Cannot perform substitution with variable capture!"
 sub (Let (Var v) n m) (l) s
     | (not (capture (n) (l)) && not (capture (m) (l))) =
     if (v == s) then (Let (Var v) n m)
     else (Let (Var v) (sub n l s) (sub m l s))
-    | otherwise = (Let (Var v) n m)
+    | otherwise = error "Cannot perform substitution with variable capture!"
 sub (App t1 t2) (l) s = (App (sub t1 l s) (sub t2 l s))
 
 -- ASK: Can "eager" normalization be done in terms to ensure "freshness" of variables? A: yes.
@@ -135,7 +138,7 @@ isConst _ = False
 
 getVar :: Expr e -> Char
 getVar (Lambda v e) = v
-getVar _ = error "Var not in scope!"
+getVar _ = error "Variable not in scope!"
 
 getConst :: Expr e -> Int
 getConst (Const c) = c
@@ -143,4 +146,4 @@ getConst _ = error "Constant not in scope!"
 
 getExpr :: Expr e -> Expr e
 getExpr (Lambda v e) = e
-getExpr _ = error "Var not in scope!"
+getExpr _ = error "Expression not in scope!"

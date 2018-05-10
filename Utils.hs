@@ -1,6 +1,7 @@
 module Utils where
 
 import Parser
+import Common
 
 -- Show behavior for Prim
 instance Show (Op) where
@@ -35,3 +36,9 @@ instance Eq (Expr e) where
   (Let x n m) == (Let y p l) = (x == y) && (n == p) && (m == l)
   (Constr (x,y)) == (Constr (z,w)) = (x == z) && (y == w)
   (Prim (x) op1 (y)) == (Prim (z) op2 (k)) = (x == z) && (y == k) && (op1 == op2)
+
+lexData :: [Char] -> Expr e
+lexData s = toData (lexer s)
+
+lexNorm :: [Char] -> Expr e
+lexNorm s = normalize (lexData s)

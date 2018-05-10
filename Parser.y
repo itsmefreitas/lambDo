@@ -1,6 +1,7 @@
 {
 module Parser where
 import Data.Char
+import Common
 }
 
 %name expr
@@ -34,10 +35,6 @@ Atom    : '(' Expr ')'                { $2 }
 
 parseError :: [Token] -> a
 parseError _ = error "Parse error!"
-
-data Expr e = Var Char | Const Int | Lambda Char (Expr e) | App (Expr e) (Expr e) | Let (Expr e) (Expr e) (Expr e) | Constr ((Expr e),(Expr e)) | Prim (Expr e) Op (Expr e)
-
-data Op = Plus | Minus | Times | Div
 
 data Token = TokenVar Char | TokenConst Int | TokenLambda Char | TokenDot | TokenOP | TokenCP | TokenLet | TokenEq | TokenIn deriving Show
 
