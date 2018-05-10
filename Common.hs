@@ -8,8 +8,8 @@ data Op = Plus | Minus | Times | Div
 
 -- Helper function to get a fresh var (used in normalization).
 
-freshVar :: Expr e -> Char
-freshVar m = head ((['z','y'..'a'] ++ ['Z','Y'..'A']) \\ (freeVar(m) `union` boundVar(m)))
+freshVar :: [Char] -> Expr e -> Char
+freshVar l m = head ((((['z','y'..'a'] ++ ['Z','Y'..'A']) \\ (freeVar(m) `union` boundVar(m))) \\ l))
 
 -- Check which vars are bound in a lambda term.
 
@@ -58,19 +58,22 @@ sub (App t1 t2) (l) s = (App (sub t1 l s) (sub t2 l s))
 -- ASK: In the Variable rule, how to proceed if no bindings are found? Simply return the variable with the queue we had as the evaluation result? A: yes.
 -- ASK: Is substitution supposed to be implemented inside (let x = ... in ...) constructs? A: find it in the notes teacher gave you.
 
--- Function to normalize lambda terms.
+-- Function to normalize' lambda terms.
 
 normalize :: Expr e -> Expr e
-normalize (Var x) = Var x
-normalize (Const c) = Const c
-normalize (Lambda x m) = Lambda x (normalize m)
-normalize (Let x n m) = Let x (normalize n) (normalize m)
-normalize (App m n)
-  | (isVar n) = App (m') (n)
-  | otherwise = Let (Var fresh) (n') (App (m') (Var fresh))
-  where fresh = freshVar (App (m') (n'))
-        n' = (normalize n)
-        m' = (normalize m)
+normalize e = fst (normalize' e [])
+
+normalize' :: Expr e -> [Char] -> (Expr e,[Char])
+normalize' (Var x) l = ((Var x),[])
+normalize' (Const c) l = ((Const c),[])
+normalize' (Lambda x m) l = ((Lambda x (fst (normalize' m l))),l)
+normalize' (Let x n m) l = ((Let x (fst (normalize' n l)) (fst (normalize' m l))), l)
+normalize' (App m n) l
+  | (isVar n) = ((App (fst m') (n)),l++(snd m'))
+  | otherwise = ((Let (Var fresh) (fst n') (App (fst m') (Var fresh))),fresh:(l++(snd m')))
+  where fresh = freshVar l (App (fst m') (fst n'))
+        n' = (normalize' n l)
+        m' = (normalize' m (l++(snd n')))
 
 -- Given a variable and stack, find and retrieve the first expression bound to it in suck stack.
 
