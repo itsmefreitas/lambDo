@@ -1,11 +1,8 @@
 module Lambda where
 
 import Data.List
-import Launchbury
-import Common
-import Parser
-import Utils
 
+import Common
 -- EvalV: function for evaluation of lambda terms using call-by-value
 
 evalV :: Expr e -> Expr e
@@ -53,12 +50,3 @@ evalNeed (App (m) (n))
   | (isReducible (m)) = evalNeed (App (evalNeed m) (evalNeed n))
   | otherwise = (App (m) (n))
 evalNeed (Let (Var y) (Let (Var x) (l) (m)) (n)) = evalNeed (Let (Var x) (l) (Let (Var y) (m) (n)))
-
-evalMain :: String -> String -> Expr e
-evalMain t l
-  | (t == "N") = evalN (ins)
-  | (t == "V") = evalV (ins)
-  | (t == "L") = evalNeed (ins)
-  | (t == "M") = snd (evalLaunch [] nins)
-    where ins = lexData l
-          nins = lexNorm l
