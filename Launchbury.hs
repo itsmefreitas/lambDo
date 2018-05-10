@@ -1,35 +1,9 @@
 module Launchbury where
 
-import Lambda
 import Parser
 import Data.List
 import Utils
-import BetaTests
-
-freshVar :: Expr e -> Char
-freshVar m = head ((['z','y'..'a'] ++ ['Z','Y'..'A']) \\ (freeVar(m) `union` boundVar(m)))
-
--- ASK: Can "eager" normalization be done in terms to ensure "freshness" of variables? A: yes.
--- ASK: In the Variable rule, how to proceed if no bindings are found? Simply return the variable with the queue we had as the evaluation result? A: yes.
--- ASK: Is substitution supposed to be implemented inside (let x = ... in ...) constructs? A: find it in the notes teacher gave you.
-
-normalize :: Expr e -> Expr e
-normalize (Var x) = Var x
-normalize (Const c) = Const c
-normalize (Lambda x m) = Lambda x (normalize m)
-normalize (Let x n m) = Let x (normalize n) (normalize m)
-normalize (App m n)
-  | (isVar n) = App (m') (n)
-  | otherwise = Let (Var fresh) (n') (App (m') (Var fresh))
-  where fresh = freshVar (App (m') (n'))
-        n' = (normalize n)
-        m' = (normalize m)
-
-getBinding :: [(Char, (Expr e))] -> Char -> [(Char, (Expr e))]
-getBinding [] _ = []
-getBinding (x:xs) c
-  | ((fst x) == c) = [x]
-  | otherwise = (getBinding xs c)
+import Common
 
 constApp :: Op -> Int -> Int -> Expr e
 constApp Plus c1 c2 = (Const (c1+c2))
@@ -65,12 +39,4 @@ evalLaunch h (Prim (m) op (n))
         theta = (fst n2)
         c1 = (snd n1)
         c2 = (snd n2)
-
--- Test cases for single-step evalLaunch version.
--- FIXME: doesn't handle intermediate (App (Var _) (Var _)) very well...
-
-stp1 = evalLaunch [] (normalize pairTestFst)
-stp2 = evalLaunch (fst stp1) (snd stp1)
-stp3 = evalLaunch (fst stp2) (snd stp2)
-stp4 = evalLaunch (fst stp3) (snd stp3)
 

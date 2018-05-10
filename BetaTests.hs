@@ -1,5 +1,8 @@
 module BetaTests where
 
+import Launchbury
+import Lambda
+import Common
 import Parser
 
 -- Lambda terms definitions for testing
@@ -68,3 +71,11 @@ vapp1 = lexer "x y"
 vapp2 = lexer "(x) (y)"
 
 vapp3 = lexer "xy"
+
+-- Test cases for single-step evalLaunch version.
+-- FIXME: doesn't handle intermediate (App (Var _) (Var _)) very well...
+
+stp1 = evalLaunch [] (normalize pairTestFst)
+stp2 = evalLaunch (fst stp1) (snd stp1)
+stp3 = evalLaunch (fst stp2) (snd stp2)
+stp4 = evalLaunch (fst stp3) (snd stp3)
