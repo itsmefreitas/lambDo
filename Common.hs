@@ -2,7 +2,17 @@ module Common where
 
 import Data.List
 
-data Expr e = Var Char | Const Int | Lambda Char (Expr e) | App (Expr e) (Expr e) | Let (Expr e) (Expr e) (Expr e) | Constr ((Expr e),(Expr e)) | Prim (Expr e) Op (Expr e)
+data Expr e = Var Char
+              | Const Int
+              | T
+              | F
+              | Nil
+              | Lambda Char (Expr e)
+              | App (Expr e) (Expr e)
+              | Let (Expr e) (Expr e) (Expr e)
+              | Constr (Expr e) (Expr e)
+              | Prim (Expr e) Op (Expr e)
+              | If (Expr e) (Expr e) (Expr e)
 
 data Op = Plus | Minus | Times | Div
 
@@ -14,6 +24,9 @@ freshVar l m = head ((((['z','y'..'a'] ++ ['Z','Y'..'A']) \\ (freeVar(m) `union`
 -- Check which vars are bound in a lambda term.
 
 boundVar :: Expr e -> [Char]
+boundVar (T) = []
+boundVar (F) = []
+boundVar (Nil) = []
 boundVar (Var v) = []
 boundVar (Const c) = []
 boundVar (Lambda s e) = [s] ++ (boundVar e)
@@ -25,6 +38,9 @@ boundVar (App t1 t2)
 -- Check which vars are free in a lambda term.
 
 freeVar :: Expr e -> [Char]
+freeVar (T) = []
+freeVar (F) = []
+freeVar (Nil) = []
 freeVar (Var v) = [v]
 freeVar (Const c) = []
 freeVar (Lambda s e) = ((freeVar e) \\ [s])
@@ -64,6 +80,9 @@ normalize :: Expr e -> Expr e
 normalize e = fst (normalize' e [])
 
 normalize' :: Expr e -> [Char] -> (Expr e,[Char])
+normalize' (T) l = (T,[])
+normalize' (F) l = (F,[])
+normalize' (Nil) l = (F,[])
 normalize' (Var x) l = ((Var x),[])
 normalize' (Const c) l = ((Const c),[])
 normalize' (Lambda x m) l = ((Lambda x (fst (normalize' m l))),l)

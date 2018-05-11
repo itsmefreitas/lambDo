@@ -1,7 +1,8 @@
 module Main where
 
-import Lambda
+import BetaTests
 import Launchbury
+import Lambda
 import Common
 import Parser
 import Utils

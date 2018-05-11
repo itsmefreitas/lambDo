@@ -4,6 +4,7 @@ import Common
 import Launchbury
 import Lambda
 import Parser
+import Utils
 
 -- Lambda terms definitions for testing
 
@@ -73,9 +74,21 @@ vapp2 = lexer "(x) (y)"
 vapp3 = lexer "xy"
 
 -- Test cases for single-step evalLaunch version.
--- FIXME: doesn't handle intermediate (App (Var _) (Var _)) very well...
 
 stp1 = evalLaunch [] (normalize pairTestFst)
 stp2 = evalLaunch (fst stp1) (snd stp1)
 stp3 = evalLaunch (fst stp2) (snd stp2)
 stp4 = evalLaunch (fst stp3) (snd stp3)
+
+la1 = (lexData "(\\xy.yx) (\\z.z)")
+lr1 = Const 2
+l = App (la1) (lr1)
+r = (App (Lambda 'x' (Var 'x')) (Const 3))
+f = App (l) (r)
+
+la2 = App (lexData "(\\xy.yx)") (T)
+la3 = App (Lambda 'y' (Var 'y')) (T)
+
+tif = App (lexData "((\\x.xx) (\\y.y))") (F)
+
+if1 = evalLaunch [] (normalize f)

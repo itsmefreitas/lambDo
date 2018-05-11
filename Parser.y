@@ -38,11 +38,7 @@ parseError _ = error "Parse error!"
 
 data Token = TokenVar Char | TokenConst Int | TokenLambda Char | TokenDot | TokenOP | TokenCP | TokenLet | TokenEq | TokenIn deriving Show
 
--- TODO: FIX lexer function processing "x" as [TokenLambda 'x', TokenDot]
--- ASK: Should I pass the current [Token] to see if its head is or isn't a TokenLambda and then decide where to direct my parser?
-
--- TODO: Implement parsing of Const Int
--- ASK: Const Int not properly parsed with digitToInt, is there anything for the correct purpose in the Prelude?
+-- TODO: parser/lexer dark magic to account for the parsing of (expr op expr) constructs as well as if statements and case statements
 
 lexer :: [Char] -> [Token]
 lexer [] = []

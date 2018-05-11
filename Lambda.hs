@@ -1,7 +1,7 @@
 module Lambda where
 
 import Data.List
-
+import Utils
 import Common
 -- EvalV: function for evaluation of lambda terms using call-by-value
 
