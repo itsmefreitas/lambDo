@@ -92,3 +92,11 @@ la3 = App (Lambda 'y' (Var 'y')) (T)
 tif = App (lexData "((\\x.xx) (\\y.y))") (F)
 
 if1 = evalLaunch [] (normalize f)
+
+bs1 = evalStep [] (normalize f)
+bs2 = evalStep (fst bs1) (snd bs1)
+bs3 = evalStep (fst bs2) (snd bs2)
+bs4 = evalStep (fst bs3) (snd bs3)
+bs5 = evalStep (fst bs4) (snd bs4)
+bs6 = evalStep (fst bs5) (snd bs5)
+bs7 = evalStep (fst bs6) (snd bs6)

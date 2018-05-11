@@ -46,3 +46,38 @@ evalLaunch h (If (e) (e1) (e2))
         eprime = (snd  lresult)
         delta = (fst lresult)
 
+evalStep :: [(Char, (Expr e))] -> Expr e -> ([(Char, (Expr e))], Expr e)
+evalStep h (T) = (h, T)
+evalStep h (F) = (h, F)
+evalStep h (Nil) = (h, Nil)
+evalStep h (Constr (x) (y)) = (h, (Constr (x) (y)))
+evalStep h (Lambda x e) = (h, (Lambda x e))
+evalStep h (Const c) = (h, (Const c))
+evalStep h (Var x)
+  | (b /= []) = (((x,n):(h \\ b)), (e))
+  | otherwise = (h, (Var x))
+  where b = (getBinding h x)
+        e = snd (head b)
+        v = evalStep (h \\ b) (e)
+        n = snd v
+evalStep h (Let (Var x) n m) =  (((x,n):h), m)
+evalStep h (App m (Var x)) = ((delta), (sub (eprime) (Var x) lvar))
+  where lresult = evalStep (h) m
+        lexpr = (snd lresult)
+        delta = (fst lresult)
+        eprime = getExpr lexpr
+        lvar = getVar lexpr
+evalStep h (Prim (m) op (n))
+  | ((isConst c1) && (isConst c2)) = ((theta), (constApp op (getConst c1) (getConst c2)))
+  where n1 = evalStep h m
+        delta = (fst n1)
+        n2 = evalStep (delta) n
+        theta = (fst n2)
+        c1 = (snd n1)
+        c2 = (snd n2)
+evalStep h (If (e) (e1) (e2))
+  | (eprime == T) = ((delta), (e1))
+  | (eprime == F) = ((delta), (e2))
+  where lresult = evalStep h e
+        eprime = (snd  lresult)
+        delta = (fst lresult)

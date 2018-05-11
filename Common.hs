@@ -19,7 +19,7 @@ data Op = Plus | Minus | Times | Div
 -- Helper function to get a fresh var (used in normalization).
 
 freshVar :: [Char] -> Expr e -> Char
-freshVar l m = head ((((['z','y'..'a'] ++ ['Z','Y'..'A']) \\ (freeVar(m) `union` boundVar(m))) \\ l))
+freshVar l m = head (((['z','y'..'a'] ++ ['Z','Y'..'A']) \\ (freeVar(m) `union` boundVar(m) `union` l)))
 
 -- Check which vars are bound in a lambda term.
 
@@ -77,14 +77,14 @@ sub (App t1 t2) (l) s = (App (sub t1 l s) (sub t2 l s))
 -- Function to normalize' lambda terms.
 
 normalize :: Expr e -> Expr e
-normalize e = fst (normalize' e [])
+normalize e = fst (normalize' e (boundVar(e) `union` freeVar(e)))
 
 normalize' :: Expr e -> [Char] -> (Expr e,[Char])
-normalize' (T) l = (T,[])
-normalize' (F) l = (F,[])
-normalize' (Nil) l = (F,[])
-normalize' (Var x) l = ((Var x),[])
-normalize' (Const c) l = ((Const c),[])
+normalize' (T) l = (T,l)
+normalize' (F) l = (F,l)
+normalize' (Nil) l = (F,l)
+normalize' (Var x) l = ((Var x),x:l)
+normalize' (Const c) l = ((Const c),l)
 normalize' (Lambda x m) l = ((Lambda x (fst (normalize' m l))),l)
 normalize' (Let x n m) l = ((Let x (fst (normalize' n l)) (fst (normalize' m l))), l)
 normalize' (App m n) l
