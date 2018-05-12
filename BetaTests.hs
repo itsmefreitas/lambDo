@@ -103,6 +103,7 @@ bs7 = evalStep (fst bs6) (snd bs6)
 
 -- 4 factorial test
 -- ASK: How to normalize this...
+
 iff = If (Prim (Var 'x') Eql (Const 0)) (Const 1) (App (Var 'f') (Prim (Var 'x') Minus (Const 1)))
 lfix = Let (Var 'k') (Lambda 'f' (Let (Var 'x') (Var 'f') (Var 'x'))) (App (App (Var 'k') (Lambda 'f' (Lambda 'x' (iff)))) (Const 4))
 

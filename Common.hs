@@ -55,6 +55,7 @@ freeVar (App t1 t2)
     | otherwise = (freeVar t1) ++ (freeVar t2)
 
 -- Implementation for variable substitution.
+-- ASK: Sub for Prim, Const, If?
 
 sub :: Expr e -> Expr e -> Char -> Expr e
 sub (Const c) (_) _ = Const c
@@ -75,7 +76,8 @@ sub (Let (Var v) n m) (l) s
     | otherwise = error "Cannot perform substitution with variable capture!"
 sub (App t1 t2) (l) s = (App (sub t1 l s) (sub t2 l s))
 
--- Function to normalize' lambda terms.
+-- Function to normalize lambda terms.
+-- ASK: How should I treat normalization of If, Prim and Cons??
 
 normalize :: Expr e -> Expr e
 normalize e = fst (normalize' e (boundVar(e) `union` freeVar(e)))
@@ -94,6 +96,7 @@ normalize' (App m n) l
   where fresh = freshVar l (App (fst m') (fst n'))
         n' = (normalize' n l)
         m' = (normalize' m (l++(snd n')))
+normalize' (If x m n) l = ((If (fst (normalize' x l)) (fst (normalize' m l)) (fst (normalize' n l))),l)
 
 -- Given a variable and stack, find and retrieve the first expression bound to it in suck stack.
 
