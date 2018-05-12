@@ -100,3 +100,13 @@ bs4 = evalStep (fst bs3) (snd bs3)
 bs5 = evalStep (fst bs4) (snd bs4)
 bs6 = evalStep (fst bs5) (snd bs5)
 bs7 = evalStep (fst bs6) (snd bs6)
+
+-- 4 factorial test
+-- ASK: How to normalize this...
+iff = If (Prim (Var 'x') Eql (Const 0)) (Const 1) (App (Var 'f') (Prim (Var 'x') Minus (Const 1)))
+lfix = Let (Var 'k') (Lambda 'f' (Let (Var 'x') (Var 'f') (Var 'x'))) (App (App (Var 'k') (Lambda 'f' (Lambda 'x' (iff)))) (Const 4))
+
+fact1 = evalStep [] lfix
+fact2 = evalStep (fst fact1) (snd fact1)
+fact3 = evalStep (fst fact2) (snd fact2)
+fact4 = evalStep (fst fact3) (snd fact3)

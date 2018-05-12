@@ -13,13 +13,18 @@ data Expr e = Var Char
               | Constr (Expr e) (Expr e)
               | Prim (Expr e) Op (Expr e)
               | If (Expr e) (Expr e) (Expr e)
+              | Case (Expr e) ((Expr e),(Expr e)) ((Expr e),(Expr e))
 
-data Op = Plus | Minus | Times | Div
+-- ASK: what boolean/unary operations is this supposed to support?
+
+data Op = Plus | Minus | Times | Div | Eql | Lt | Gt
 
 -- Helper function to get a fresh var (used in normalization).
 
 freshVar :: [Char] -> Expr e -> Char
 freshVar l m = head (((['z','y'..'a'] ++ ['Z','Y'..'A']) \\ (freeVar(m) `union` boundVar(m) `union` l)))
+
+-- ASK: Should freeVar and boundVar be implemented for if-statements, constr and prim?
 
 -- Check which vars are bound in a lambda term.
 
@@ -69,10 +74,6 @@ sub (Let (Var v) n m) (l) s
     else (Let (Var v) (sub n l s) (sub m l s))
     | otherwise = error "Cannot perform substitution with variable capture!"
 sub (App t1 t2) (l) s = (App (sub t1 l s) (sub t2 l s))
-
--- ASK: Can "eager" normalization be done in terms to ensure "freshness" of variables? A: yes.
--- ASK: In the Variable rule, how to proceed if no bindings are found? Simply return the variable with the queue we had as the evaluation result? A: yes.
--- ASK: Is substitution supposed to be implemented inside (let x = ... in ...) constructs? A: find it in the notes teacher gave you.
 
 -- Function to normalize' lambda terms.
 
@@ -158,6 +159,14 @@ isConst :: Expr e -> Bool
 isConst (Const e) = True
 isConst _ = False
 
+isNil :: Expr e -> Bool
+isNil (Nil) = True
+isNil _ = False
+
+isConstr :: Expr e -> Bool
+isConstr (Constr (x) (xs)) = True
+isConstr _ = False
+
 getVar :: Expr e -> Char
 getVar (Lambda v e) = v
 getVar _ = error "Variable not in scope!"
@@ -169,3 +178,11 @@ getConst _ = error "Constant not in scope!"
 getExpr :: Expr e -> Expr e
 getExpr (Lambda v e) = e
 getExpr _ = error "Expression not in scope!"
+
+getCFst :: Expr e -> Expr e
+getCFst (Constr (x) (xs)) = x
+getCFst _ = error "This expression isn't a constructor!"
+
+getCSnd :: Expr e -> Expr e
+getCSnd (Constr (x) (xs)) = xs
+getCSnd _ = error "This expression isn't a constructor!"

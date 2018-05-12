@@ -4,11 +4,17 @@ import Data.List
 import Utils
 import Common
 
-constApp :: Op -> Int -> Int -> Expr e
-constApp Plus c1 c2 = (Const (c1+c2))
-constApp Minus c1 c2 = (Const (c1-c2))
-constApp Times c1 c2 = (Const (c1*c2))
-constApp Div c1 c2 = (Const (quot c1 c2))
+-- Ask: why was the last definition not working with guards?
+
+constApp :: Op -> Expr e -> Expr e -> Expr e
+constApp Plus c1 c2 = (Const ((getConst c1)+(getConst c2)))
+constApp Minus c1 c2 = (Const ((getConst c1)-(getConst c2)))
+constApp Times c1 c2 = (Const ((getConst c1)*(getConst c2)))
+constApp Div c1 c2 = (Const (quot (getConst c1) (getConst c2)))
+constApp Eql c1 c2 = if (c1 == c2) then T else F
+
+-- ASK: Not sure about how to deal with case rule and which examples to use while testing...
+-- ASK: Can we use the constructors to perform operations such as map (+1) [1,2,3] a la Haskell?
 
 evalLaunch :: [(Char, (Expr e))] -> Expr e -> ([(Char, (Expr e))], Expr e)
 evalLaunch h (T) = (h, T)
@@ -31,8 +37,7 @@ evalLaunch h (App m (Var x)) = evalLaunch (delta) (sub (eprime) (Var x) lvar)
         delta = (fst lresult)
         eprime = getExpr lexpr
         lvar = getVar lexpr
-evalLaunch h (Prim (m) op (n))
-  | ((isConst c1) && (isConst c2)) = ((theta), (constApp op (getConst c1) (getConst c2)))
+evalLaunch h (Prim (m) op (n)) = ((theta), (constApp op (c1) (c2)))
   where n1 = evalLaunch h m
         delta = (fst n1)
         n2 = evalLaunch (delta) n
@@ -45,6 +50,14 @@ evalLaunch h (If (e) (e1) (e2))
   where lresult = evalLaunch h e
         eprime = (snd  lresult)
         delta = (fst lresult)
+evalLaunch h (Case e ((Nil),(e1)) ((Constr (y1) (ys)),(e2)))
+  | (isNil eprime) = evalLaunch (delta) (e1)
+  | (isConstr eprime) = evalLaunch (delta) (sub (sub (e2) (x) (getVar y1)) (xs) (getVar ys))
+  where lresult = evalLaunch h e
+        eprime = (snd lresult)
+        delta = (fst lresult)
+        x = (getCFst eprime)
+        xs = (getCSnd eprime)
 
 evalStep :: [(Char, (Expr e))] -> Expr e -> ([(Char, (Expr e))], Expr e)
 evalStep h (T) = (h, T)
@@ -68,7 +81,7 @@ evalStep h (App m (Var x)) = ((delta), (sub (eprime) (Var x) lvar))
         eprime = getExpr lexpr
         lvar = getVar lexpr
 evalStep h (Prim (m) op (n))
-  | ((isConst c1) && (isConst c2)) = ((theta), (constApp op (getConst c1) (getConst c2)))
+  | ((isConst c1) && (isConst c2)) = ((theta), (constApp op (c1) (c2)))
   where n1 = evalStep h m
         delta = (fst n1)
         n2 = evalStep (delta) n

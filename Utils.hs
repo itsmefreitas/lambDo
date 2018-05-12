@@ -9,19 +9,25 @@ instance Show (Op) where
   show (Minus) = " - "
   show (Times) = " * "
   show (Div) = " / "
+  show (Eql) = " == "
+  show (Gt) = " > "
+  show (Lt) = " < "
   
 instance Eq (Op) where
   (Plus) == (Plus) = True
   (Minus) == (Minus) = True
   (Times) == (Times) = True
   (Div) == (Div) = True
+  (Eql) == (Eql) = True
+  (Gt) == (Gt) = True
+  (Lt) == (Lt) = True
   (_) == (_) = False
   
 -- Show behavior for Expr e
 -- ASK: Can I have my show instance rewriting terms like (λx.(λy.x)y) to (λxy.xy)?
 instance Show (Expr e) where
-  show (T) = "True"
-  show (F) = "False"
+  show (T) = "T"
+  show (F) = "F"
   show (Nil) = "∅"
   show (Var v) = [v]
   show (Const c) = show c
@@ -31,6 +37,7 @@ instance Show (Expr e) where
   show (Constr (a) (e)) = "[" ++ (show a) ++ ":" ++ (show e) ++ "]"
   show (Prim (x) op (y)) = (show x) ++ (show op) ++ (show y)
   show (If (e) (e1) (e2)) = "if (" ++ (show e) ++ ") then (" ++ (show e1) ++ ") else (" ++ (show e2) ++ ")"
+  show (Case (e) ((l),(e1)) ((c),(e2))) = "case " ++ (show e) ++ " of {" ++ (show l) ++ " -> " ++ (show e1) ++ "; " ++ (show c) ++ " -> " ++ (show e2) ++ "}"
 
 showBody :: Expr e -> [Char]
 showBody (Lambda s e) = [s] ++ (showBody e)
@@ -49,6 +56,8 @@ instance Eq (Expr e) where
   (Let x n m) == (Let y p l) = (x == y) && (n == p) && (m == l)
   (Constr (a) (e)) == (Constr (b) (f)) = (a == b) && (e == f)
   (Prim (x) op1 (y)) == (Prim (z) op2 (k)) = (x == z) && (y == k) && (op1 == op2)
+  (If (x) (e1) (e2)) == (If (y) (f1) (f2)) = (x == y) && (e1 == f1) && (e2 == f2)
+  (Case (e) ((l),(e1)) ((c),(e2))) == (Case (f) ((m),(f1)) ((d),(f2))) = (e == f) && (l == m) && (e1 == f1) && (c == d) && (e2 == f2)
   (_) == (_) = False
 
 lexData :: [Char] -> Expr e

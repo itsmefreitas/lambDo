@@ -38,7 +38,7 @@ parseError _ = error "Parse error!"
 
 data Token = TokenVar Char | TokenConst Int | TokenLambda Char | TokenDot | TokenOP | TokenCP | TokenLet | TokenEq | TokenIn deriving Show
 
--- TODO: parser/lexer dark magic to account for the parsing of (expr op expr) constructs as well as if statements and case statements
+-- TODO: parser/lexer dark magic to account for the parsing of (expr op expr) constructs as well as if and case statements
 
 lexer :: [Char] -> [Token]
 lexer [] = []
