@@ -25,6 +25,7 @@ instance Eq (Op) where
   
 -- Show behavior for Expr e
 -- ASK: Can I have my show instance rewriting terms like (λx.(λy.x)y) to (λxy.xy)?
+
 instance Show (Expr e) where
   show (T) = "T"
   show (F) = "F"

@@ -39,6 +39,10 @@ boundVar (Let x n m) = (freeVar x) ++ (boundVar n) ++ (boundVar m)
 boundVar (App t1 t2)
     | ((boundVar t1) == (boundVar t2)) = (boundVar t1)
     | otherwise = (boundVar t1) ++ (boundVar t2)
+boundVar (Constr (m) (n)) = (boundVar m) ++ (boundVar n)
+boundVar (Prim (x) op (y)) = (boundVar x) ++ (boundVar y)
+boundVar (If (x) (m) (n)) = (boundVar x) ++ (boundVar m) ++ (boundVar n)
+boundVar (Case (e) ((e1),(c1)) ((e2),(c2))) = (boundVar e) ++ (boundVar e1) ++ (boundVar c1) ++ (boundVar e2) ++ (boundVar c2)
     
 -- Check which vars are free in a lambda term.
 
@@ -53,11 +57,18 @@ freeVar (Let x m n) = ((freeVar m) ++ (freeVar n)) \\ ((freeVar x) ++ (boundVar 
 freeVar (App t1 t2)
     | ((freeVar t1) == (freeVar t2)) = (freeVar t1)
     | otherwise = (freeVar t1) ++ (freeVar t2)
+freeVar (Constr (m) (n)) = (freeVar m) ++ (freeVar n)
+freeVar (Prim (x) op (y)) = (freeVar x) ++ (freeVar y)
+freeVar (If (x) (m) (n)) = (freeVar x) ++ (freeVar m) ++ (freeVar n)
+freeVar (Case (e) ((e1),(c1)) ((e2),(c2))) = (freeVar e) ++ (freeVar e1) ++ (freeVar c1) ++ (freeVar e2) ++ (freeVar c2)
 
 -- Implementation for variable substitution.
 -- ASK: Sub for Prim, Const, If?
 
 sub :: Expr e -> Expr e -> Char -> Expr e
+sub (T) (_) _ = T
+sub (F) (_) _ = F
+sub (Nil) (_) _ = Nil
 sub (Const c) (_) _ = Const c
 sub (Var v) (l) s
     | (not (capture (Var v) (l))) =
@@ -75,6 +86,18 @@ sub (Let (Var v) n m) (l) s
     else (Let (Var v) (sub n l s) (sub m l s))
     | otherwise = error "Cannot perform substitution with variable capture!"
 sub (App t1 t2) (l) s = (App (sub t1 l s) (sub t2 l s))
+sub (Constr (m) (n)) (l) s
+    | ((not (capture m l)) && (not (capture n l))) = Constr (sub m l s) (sub n l s)
+    | otherwise = error "Cannot perform substitution with variable capture!"
+sub (Prim (x) op (y)) (l) s
+    | ((not (capture x l)) && (not (capture y l))) = (Prim (sub x l s) op (sub y l s))
+    | otherwise = error "Cannot perform substitution with variable capture!"
+sub (If (x) (m) (n)) (l) s
+    | ((not (capture x l)) && (not (capture m l)) && (not (capture n l))) = (If (sub x l s) (sub m l s) (sub n l s))
+    | otherwise = error "Cannot perform substitution with variable capture!"
+sub (Case (e) ((e1),(c1)) ((e2),(c2))) (l) s
+    | ((not (capture e l)) && (not (capture e1 l)) && (not (capture c1 l)) && (not (capture e2 l)) && (not (capture c2 l))) = (Case (sub e l s) ((sub e1 l s),(sub c1 l s)) ((sub e2 l s),(sub c2 l s)))
+    | otherwise = error "Cannot perform substitution with variable capture!"
 
 -- Function to normalize lambda terms.
 -- ASK: How should I treat normalization of If, Prim and Cons??
@@ -85,7 +108,7 @@ normalize e = fst (normalize' e (boundVar(e) `union` freeVar(e)))
 normalize' :: Expr e -> [Char] -> (Expr e,[Char])
 normalize' (T) l = (T,l)
 normalize' (F) l = (F,l)
-normalize' (Nil) l = (F,l)
+normalize' (Nil) l = (Nil,l)
 normalize' (Var x) l = ((Var x),x:l)
 normalize' (Const c) l = ((Const c),l)
 normalize' (Lambda x m) l = ((Lambda x (fst (normalize' m l))),l)
@@ -96,7 +119,10 @@ normalize' (App m n) l
   where fresh = freshVar l (App (fst m') (fst n'))
         n' = (normalize' n l)
         m' = (normalize' m (l++(snd n')))
+normalize' (Constr m n) l = ((Constr (fst (normalize' m l)) (fst (normalize' n l))),l)
+normalize' (Prim x op y) l = ((Prim (fst (normalize' x l)) op ((fst (normalize' y l)))), l)
 normalize' (If x m n) l = ((If (fst (normalize' x l)) (fst (normalize' m l)) (fst (normalize' n l))),l)
+normalize' (Case (e) ((e1),(c1)) ((e2),(c2))) l = ((Case (fst (normalize' e l)) ((fst (normalize' e1 l)),(fst (normalize' c1 l))) ((fst (normalize' e2 l)),(fst (normalize' c2 l)))) ,l)
 
 -- Given a variable and stack, find and retrieve the first expression bound to it in suck stack.
 
@@ -173,6 +199,10 @@ isConstr _ = False
 getVar :: Expr e -> Char
 getVar (Lambda v e) = v
 getVar _ = error "Variable not in scope!"
+
+getCVar :: Expr e -> Char
+getCVar (Var v) = v
+getCVar _ = error "Variable not in scope!"
 
 getConst :: Expr e -> Int
 getConst (Const c) = c

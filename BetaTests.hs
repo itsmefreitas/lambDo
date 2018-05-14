@@ -107,7 +107,19 @@ bs7 = evalStep (fst bs6) (snd bs6)
 iff = If (Prim (Var 'x') Eql (Const 0)) (Const 1) (App (Var 'f') (Prim (Var 'x') Minus (Const 1)))
 lfix = Let (Var 'k') (Lambda 'f' (Let (Var 'x') (Var 'f') (Var 'x'))) (App (App (Var 'k') (Lambda 'f' (Lambda 'x' (iff)))) (Const 4))
 
-fact1 = evalStep [] lfix
+fact1 = evalStep [] (normalize lfix)
 fact2 = evalStep (fst fact1) (snd fact1)
 fact3 = evalStep (fst fact2) (snd fact2)
 fact4 = evalStep (fst fact3) (snd fact3)
+
+-- LengthTest [1,4]
+
+l1 = Let (Var 'f') (leq) (lin)
+leq = (Lambda 'x' (Case (Var 'x') ((Nil),(Const 0)) ((Constr (Var 'y') (Var 'z')),(Prim (Const 1) Plus (App (Var 'f') (Var 'z'))))))
+lin = (App (Var 'f') (Constr (Const 2) (Constr (Const 4) (Nil))))
+
+list1 = evalStep [] (normalize l1)
+list2 = evalStep (fst list1) (snd list1)
+list3 = evalStep (fst list2) (snd list2)
+list4 = evalStep (fst list3) (snd list3)
+list5 = evalStep (fst list4) (snd list4)

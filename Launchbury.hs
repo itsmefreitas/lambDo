@@ -52,7 +52,7 @@ evalLaunch h (If (e) (e1) (e2))
         delta = (fst lresult)
 evalLaunch h (Case e ((Nil),(e1)) ((Constr (y1) (ys)),(e2)))
   | (isNil eprime) = evalLaunch (delta) (e1)
-  | (isConstr eprime) = evalLaunch (delta) (sub (sub (e2) (x) (getVar y1)) (xs) (getVar ys))
+  | (isConstr eprime) = evalLaunch (delta) (sub (sub (e2) (x) (getCVar y1)) (xs) (getCVar ys))
   where lresult = evalLaunch h e
         eprime = (snd lresult)
         delta = (fst lresult)
@@ -80,8 +80,7 @@ evalStep h (App m (Var x)) = ((delta), (sub (eprime) (Var x) lvar))
         delta = (fst lresult)
         eprime = getExpr lexpr
         lvar = getVar lexpr
-evalStep h (Prim (m) op (n))
-  | ((isConst c1) && (isConst c2)) = ((theta), (constApp op (c1) (c2)))
+evalStep h (Prim (m) op (n)) = ((theta), (constApp op (c1) (c2)))
   where n1 = evalStep h m
         delta = (fst n1)
         n2 = evalStep (delta) n
@@ -94,3 +93,11 @@ evalStep h (If (e) (e1) (e2))
   where lresult = evalStep h e
         eprime = (snd  lresult)
         delta = (fst lresult)
+evalStep h (Case e ((Nil),(e1)) ((Constr (y1) (ys)),(e2)))
+  | (isNil eprime) = ((delta), (e1))
+  | (isConstr eprime) = ((delta), (sub (sub (e2) (x) (getCVar y1)) (xs) (getCVar ys)))
+  where lresult = evalStep h e
+        eprime = (snd lresult)
+        delta = (fst lresult)
+        x = (getCFst eprime)
+        xs = (getCSnd eprime)
