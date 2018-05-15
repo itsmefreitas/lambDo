@@ -102,10 +102,10 @@ bs6 = evalStep (fst bs5) (snd bs5)
 bs7 = evalStep (fst bs6) (snd bs6)
 
 -- 4 factorial test
--- ASK: How to normalize this...
 
 fix = Lambda 'f' (Let (Var 'x') (App (Var 'f') (Var 'x')) (Var 'x'))
 iflam = Lambda 'g' (Lambda 'y' (If (Prim (Var 'y') Eql (Const 0)) (Const 1) (App (Var 'g') (Prim (Var 'y') Minus (Const 1)))))
+
 fact = Let (Var 'k') (fix) (App (App (Var 'k') (iflam)) (Const 4))
 
 -- Length [1,2,Nil]
@@ -114,3 +114,7 @@ list = Constr (Const 2) (Constr (Const 4) (Nil))
 lfix = Lambda 'f' (App (Lambda 'x' (App (Var 'f') (App (Var 'x') (Var 'x')))) (Lambda 'x' (App (Var 'f') (App (Var 'x') (Var 'x')))))
 lfix1 = Let (Var 'c') (Lambda 'h' (Let (Var 'k') (App (Var 'h') (Var 'k')) (Var 'k'))) (Var 'c')
 lcase = Lambda 'g' (Lambda 'y' (Case (Var 'y') ((Nil),(Const 0)) ((Constr (Var 'a') (Var 'b')),(Prim (Const 1) Plus (App (Var 'g') (Var 'b'))))))
+
+len = App (App (lfix) (lcase)) (list)
+
+len1 = App (App (lfix1) (lcase)) (list)
