@@ -86,18 +86,18 @@ sub (Let (Var v) n m) (l) s
     else (Let (Var v) (sub n l s) (sub m l s))
     | otherwise = error "Cannot perform substitution with variable capture!"
 sub (App t1 t2) (l) s = (App (sub t1 l s) (sub t2 l s))
-sub (Constr (m) (n)) (l) s
-    | ((not (capture m l)) && (not (capture n l))) = Constr (sub m l s) (sub n l s)
-    | otherwise = error "Cannot perform substitution with variable capture!"
-sub (Prim (x) op (y)) (l) s
-    | ((not (capture x l)) && (not (capture y l))) = (Prim (sub x l s) op (sub y l s))
-    | otherwise = error "Cannot perform substitution with variable capture!"
-sub (If (x) (m) (n)) (l) s
-    | ((not (capture x l)) && (not (capture m l)) && (not (capture n l))) = (If (sub x l s) (sub m l s) (sub n l s))
-    | otherwise = error "Cannot perform substitution with variable capture!"
-sub (Case (e) ((e1),(c1)) ((e2),(c2))) (l) s
-    | ((not (capture e l)) && (not (capture e1 l)) && (not (capture c1 l)) && (not (capture e2 l)) && (not (capture c2 l))) = (Case (sub e l s) ((sub e1 l s),(sub c1 l s)) ((sub e2 l s),(sub c2 l s)))
-    | otherwise = error "Cannot perform substitution with variable capture!"
+sub (Constr (m) (n)) (l) s = Constr (sub m l s) (sub n l s)
+--    | ((not (capture m l)) && (not (capture n l))) = Constr (sub m l s) (sub n l s)
+--    | otherwise = error "Cannot perform substitution with variable capture!"
+sub (Prim (x) op (y)) (l) s = Prim (sub x l s) op (sub y l s)
+--    | ((not (capture x l)) && (not (capture y l))) = (Prim (sub x l s) op (sub y l s))
+--    | otherwise = error "Cannot perform substitution with variable capture!"
+sub (If (x) (m) (n)) (l) s = If (sub x l s) (sub m l s) (sub n l s)
+--    | ((not (capture x l)) && (not (capture m l)) && (not (capture n l))) = (If (sub x l s) (sub m l s) (sub n l s))
+--    | otherwise = error "Cannot perform substitution with variable capture!"
+sub (Case (e) ((e1),(c1)) ((e2),(c2))) (l) s = Case (sub e l s) ((sub e1 l s),(sub c1 l s)) ((sub e2 l s),(sub c2 l s))
+--    | ((not (capture e l)) && (not (capture e1 l)) && (not (capture c1 l)) && (not (capture e2 l)) && (not (capture c2 l))) = (Case (sub e l s) ((sub e1 l s),(sub c1 l s)) ((sub e2 l s),(sub c2 l s)))
+--    | otherwise = error "Cannot perform substitution with variable capture!"
 
 -- Function to normalize lambda terms.
 -- ASK: How should I treat normalization of If, Prim and Cons??
