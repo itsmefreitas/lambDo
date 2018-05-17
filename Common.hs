@@ -133,7 +133,7 @@ normalize' (Prim x op y) l = ((Prim (fst (normalize' x l)) op ((fst (normalize' 
 normalize' (If x m n) l = ((If (fst (normalize' x l)) (fst (normalize' m l)) (fst (normalize' n l))),l)
 normalize' (Case (e) ((e1),(c1)) ((e2),(c2))) l = ((Case (fst (normalize' e l)) ((fst (normalize' e1 l)),(fst (normalize' c1 l))) ((fst (normalize' e2 l)),(fst (normalize' c2 l)))) ,l)
 
--- Given a variable and stack, find and retrieve the first expression bound to it in suck stack.
+-- Given a variable and stack, find and retrieve the first expression bound to it in such stack.
 
 getBinding :: [(Char, (Expr e))] -> Char -> [(Char, (Expr e))]
 getBinding [] _ = []

@@ -101,12 +101,22 @@ bs5 = evalStep (fst bs4) (snd bs4)
 bs6 = evalStep (fst bs5) (snd bs5)
 bs7 = evalStep (fst bs6) (snd bs6)
 
--- 4 factorial test
+-- 4 factorial test (with fixed points/combinators)
 
 fix = Lambda 'f' (Let (Var 'x') (App (Var 'f') (Var 'x')) (Var 'x'))
 iflam = Lambda 'g' (Lambda 'y' (If (Prim (Var 'y') Eql (Const 0)) (Const 1) (App (Var 'g') (Prim (Var 'y') Minus (Const 1)))))
 
 fact = Let (Var 'k') (fix) (App (App (Var 'k') (iflam)) (Const 4))
+
+-- 4 factorial test (with fixed points/combinators & complete definition)
+
+iflamult = Lambda 'g' (Lambda 'y' (If (Prim (Var 'y') Eql (Const 0)) (Const 1) (Prim (Var 'y') Times (App (Var 'g') (Prim (Var 'y') Minus (Const 1))))))
+
+factm = Let (Var 'k') (fix) (App (App (Var 'k') (iflamult)) (Const 4))
+
+-- 4 factorial test (let direct recursion)
+
+nfix = Let (Var 'f') (Lambda 'x' (If (Prim (Var 'x') Eql (Const 0)) (Const 1) (Prim (Var 'x') Times (App (Var 'f') (Prim (Var 'x') Minus (Const 1)))))) (App (Var 'f') (Const 4))
 
 -- Length [1,2,Nil]
 
@@ -118,3 +128,17 @@ lcase = Lambda 'g' (Lambda 'y' (Case (Var 'y') ((Nil),(Const 0)) ((Constr (Var '
 len = App (App (lfix) (lcase)) (list)
 
 len1 = App (App (lfix1) (lcase)) (list)
+
+-- Launchbury's example III
+
+l3 = normalize (Let (Var 'u') (Prim (Const 3) Plus (Const 2)) (Let (Var 'f') (Let (Var 'v') (Prim (Var 'u') Plus (Const 1)) (Lambda 'x' (Prim (Var 'v') Plus (Var 'x')))) (Prim (App (Var 'f') (Const 2)) Plus (App (Var 'f') (Const 3)))))
+
+l31 = evalStep [] l3
+l32 = evalStep (fst l31) (snd l31)
+l33 = evalStep (fst l32) (snd l32)
+l34 = evalStep (fst l33) (snd l33)
+l35 = evalStep (fst l34) (snd l34)
+
+-- Infinite recursion test.
+
+f2 = Let (Var 'f') (Lambda 'x' (App (Var 'f') (Var 'x'))) (App (Var 'f') (Const 2))

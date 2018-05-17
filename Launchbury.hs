@@ -59,6 +59,8 @@ evalLaunch h (Case e ((Nil),(e1)) ((Constr (y1) (ys)),(e2)))
         x = (getCFst eprime)
         xs = (getCSnd eprime)
 
+-- FIXME: polymorphic behaviour for (App () ()), evaluation MUST continue with the left-hand side.
+
 evalStep :: [(Char, (Expr e))] -> Expr e -> ([(Char, (Expr e))], Expr e)
 evalStep h (T) = (h, T)
 evalStep h (F) = (h, F)
@@ -67,13 +69,13 @@ evalStep h (Constr (x) (y)) = (h, (Constr (x) (y)))
 evalStep h (Lambda x e) = (h, (Lambda x e))
 evalStep h (Const c) = (h, (Const c))
 evalStep h (Var x)
-  | (b /= []) = (((x,n):(h \\ b)), (e))
+  | (b /= []) = evalStep ((x,n):(h \\ b)) (e)
   | otherwise = (h, (Var x))
   where b = (getBinding h x)
         e = snd (head b)
         v = evalStep (h \\ b) (e)
         n = snd v
-evalStep h (Let (Var x) n m) =  (((x,n):h), m)
+evalStep h (Let (Var x) n m) = (((x,n):h), m)
 evalStep h (App m (Var x)) = ((delta), (sub (eprime) (Var x) lvar))
   where lresult = evalStep (h) m
         lexpr = (snd lresult)
