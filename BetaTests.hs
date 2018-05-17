@@ -104,15 +104,9 @@ bs7 = evalStep (fst bs6) (snd bs6)
 -- 4 factorial test (with fixed points/combinators)
 
 fix = Lambda 'f' (Let (Var 'x') (App (Var 'f') (Var 'x')) (Var 'x'))
-iflam = Lambda 'g' (Lambda 'y' (If (Prim (Var 'y') Eql (Const 0)) (Const 1) (App (Var 'g') (Prim (Var 'y') Minus (Const 1)))))
+iflam = Lambda 'g' (Lambda 'y' (If (Prim (Var 'y') Eql (Const 0)) (Const 1) (Prim (Var 'y') Times (App (Var 'g') (Prim (Var 'y') Minus (Const 1))))))
 
 fact = Let (Var 'k') (fix) (App (App (Var 'k') (iflam)) (Const 4))
-
--- 4 factorial test (with fixed points/combinators & complete definition)
-
-iflamult = Lambda 'g' (Lambda 'y' (If (Prim (Var 'y') Eql (Const 0)) (Const 1) (Prim (Var 'y') Times (App (Var 'g') (Prim (Var 'y') Minus (Const 1))))))
-
-factm = Let (Var 'k') (fix) (App (App (Var 'k') (iflamult)) (Const 4))
 
 -- 4 factorial test (let direct recursion)
 
@@ -142,3 +136,9 @@ l35 = evalStep (fst l34) (snd l34)
 -- Infinite recursion test.
 
 f2 = Let (Var 'f') (Lambda 'x' (App (Var 'f') (Var 'x'))) (App (Var 'f') (Const 2))
+
+-- Test length of list (again)
+
+letf = Lambda 'f' (Let (Var 'x') (App (Var 'f') (Var 'x')) (Var 'x'))
+lamcase = Lambda 'y' (Case (Var 'y') ((Nil),(Const 0)) ((Constr (Var 'a') (Var 'b')),(Prim (Const 1) Plus (App (Var 'g') (Var 'b')))))
+la = Let (Var 'm') (list) (Let (Var 'g') (App (letf) (lamcase)) (App (Var 'g') (Var 'm')))
