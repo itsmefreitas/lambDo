@@ -11,7 +11,6 @@ evalV (Var v) = Var v
 evalV (Lambda v e) = Lambda v e
 evalV (App t1 t2)
   | (isLambda t') = apply (evalV t1) $! (evalV t2)
-  | ((isConst t') && (isConst n')) = (App (t') (n'))
   | not (isReducible (App t' n')) = (App t' n')
     where n' = (evalV t2)
           t' = (evalV t1)
