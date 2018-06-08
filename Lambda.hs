@@ -8,12 +8,11 @@ import Common
 evalV :: Expr e -> Expr e
 evalV (Const c) = Const c
 evalV (Var v) = Var v
-evalV (Lambda v e) = Lambda v e
-evalV (App t1 t2)
-  | (isLambda t') = apply (evalV t1) $! (evalV t2)
-  | not (isReducible (App t' n')) = (App t' n')
-    where n' = (evalV t2)
-          t' = (evalV t1)
+evalV (Lambda v m) = Lambda v m
+evalV (App m n)
+  | (isLambda m') = apply (evalV m) $! (evalV n)
+  | not (isReducible (App m n)) = (App m n)
+    where m' = (evalV m)
           
 apply (Lambda x e) v = evalV(sub e v x)
 apply m n = (App m n)
@@ -25,13 +24,13 @@ apply m n = (App m n)
 evalN :: Expr e -> Expr e
 evalN (Const c) = Const c
 evalN (Var v) = Var v
-evalN (Lambda v e) = Lambda v e
-evalN (App t1 t2)
-  | (isLambda t') = evalN ((sub (m') (t2) (v')))
-  | not (isReducible (App t' t2)) = (App t' t2)
-    where t' = (evalN t1)
-          m' = (getExpr t')
-          v' = (getVar t')
+evalN (Lambda v m) = Lambda v m
+evalN (App m n)
+  | (isLambda m') = evalN ((sub (body) (n) (var)))
+  | not (isReducible (App m n)) = (App m n)
+    where m' = (evalN m)
+          body = (getExpr m')
+          var = (getVar m')
 
 -- ASK: What should I do with non-terminating terms when implementing rule (G)? Merge it with (V) like I did? A: YES
 -- ASK: is the pattern (App (m) (n)) well matched? A: YES.
